@@ -22,6 +22,8 @@ const thingSchema = new Schema({
 
     }
 
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Thing', thingSchema);

@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const envars = require('./util/config');
 const app = express();
 const authRoutes = require('./routes/auth');
-// const mirrorRoutes = require('./routes/mirror');
+const mirrorRoutes = require('./routes/mirror');
 
 
 
@@ -15,14 +15,14 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
         'Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+        'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers'
     );
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, PUT', 'OPTIONS');
     next();
 });
 
 app.use('/auth', authRoutes);
-// app.use('/mirror', mirrorRoutes);
+app.use('/mirror', mirrorRoutes);
 
 // Error handling middleware
 app.use((error, req, res, next) => {
