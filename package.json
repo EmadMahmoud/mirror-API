@@ -3,15 +3,21 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.2.0",
-    "mongoose": "^8.0.0"
+    "mongoose": "^8.0.0",
+    "nodemailer": "^6.9.7"
   },
   "name": "mirror-api",
   "version": "1.0.0",
   "description": "the api version of mirror project",
   "main": "app.js",
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.0.1",
+    "sinon": "^17.0.1"
   },
   "scripts": {
     "test": "mocha",
