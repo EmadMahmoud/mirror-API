@@ -1,6 +1,9 @@
 const Thing = require('../models/thing');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
+const fs = require('fs');
+const path = require('path');
+const PDFDocument = require('pdfkit');
 
 exports.addThing = async (req, res, next) => {
     const category = req.body.category;
@@ -160,4 +163,70 @@ exports.deleteThing = async (req, res, next) => {
         }
         next(err);
     }
+}
+
+exports.generatePdf = async (req, res, next) => {
+
+    const profileId = req.params.profileId;
+
+    User.findById(profileId).populate('profile.things.thingId')
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            if (user._id.toString() !== req.userId.toString()) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+
+            const fileName = `${profileId}.pdf`;
+            let filePath = path.join('data', fileName);
+            filePath = filePath.replace(/\\/g, "/");
+            const pdfDoc = new PDFDocument();
+            pdfDoc.pipe(fs.createWriteStream(filePath));
+
+            // Create PDF content
+            pdfDoc.fontSize(26).text(`${user.email.split('@')[0]} profile`, {
+                underline: false
+            });
+            pdfDoc.text('-----------------------');
+            let totalThings = 0;
+            user.profile.things.forEach(thing => {
+                totalThings++;
+                pdfDoc.fontSize(14).text(`${totalThings}. ${thing.thingId.name} (${thing.thingId.category})`);
+                pdfDoc.fontSize(10).text(`${thing.thingId.comment}`);
+                pdfDoc.text('-----------------------');
+            });
+            pdfDoc.end();
+
+            res.status(200).json({ filePath: filePath }); // Respond with the file path
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        })
+
+
+
+    // const userId = req.userId;
+    // const things = await Thing.find({ userId: userId });
+    // const pdfDoc = new PDFDocument();
+    // res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', 'inline; filename="things.pdf"');
+    // pdfDoc.pipe(fs.createWriteStream('things.pdf'));
+    // pdfDoc.pipe(res);
+    // pdfDoc.fontSize(26).text('Things List', {
+    //     underline: true
+    // });
+    // pdfDoc.text('-----------------------');
+    // let totalPrice = 0;
+    // things.forEach(thing => {
+    //     totalPrice += thing.price;
+    //     pdfDoc.fontSize(14).text(thing.name + ' - ' + thing.price);
+    // });
+    // pdfDoc.text('-----------------------');
+    // pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+    // pdfDoc.end();
 }

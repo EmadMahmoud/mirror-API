@@ -5,10 +5,12 @@ const envars = require('./util/config');
 const app = express();
 const authRoutes = require('./routes/auth');
 const mirrorRoutes = require('./routes/mirror');
-
+const path = require('path');
 
 
 app.use(bodyParser.json()); // application/json
+app.use('/data', express.static(path.join(__dirname, 'data')));
+
 
 // CORS error handling
 app.use((req, res, next) => {

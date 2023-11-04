@@ -32,6 +32,7 @@ router.put('/editThing/:thingid',
 
 router.delete('/deleteThing/:thingid', isAuth, mirrorController.deleteThing);
 
+router.get('/profile/:profileId', isAuth, mirrorController.generatePdf)
 
 module.exports = router;
 

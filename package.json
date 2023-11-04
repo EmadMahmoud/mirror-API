@@ -7,7 +7,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.2.0",
     "mongoose": "^8.0.0",
-    "nodemailer": "^6.9.7"
+    "nodemailer": "^6.9.7",
+    "pdfkit": "^0.13.0"
   },
   "name": "mirror-api",
   "version": "1.0.0",
