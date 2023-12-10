@@ -14,6 +14,8 @@ const userSchema = new Schema({
         require: true,
         trim: true
     },
+    resetToken: String,
+    resetTokenEpiration: Date,
     profile: {
         things: [
             {

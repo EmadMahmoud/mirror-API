@@ -53,5 +53,23 @@ router.post('/login',
     ],
     authController.login)
 
+router.post('/sendResetPasswordLink',
+    [
+        body('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail'),
+    ],
+    authController.sendResetPasswordLink)
+router.patch('/setNewPassword',
+    [
+        body('password', 'The Password need to be between 5-30 character length and alphanumeric').isLength({ min: 5, max: 30 }).isAlphanumeric(),
+        body('confirmPassword').custom((value, { req }) => {
+            if (value !== req.body.password) {
+                throw new Error('Passwords have to match!');
+            }
+            return true;
+        }),
+    ],
+    authController.setNewPassword
+)
+
 
 module.exports = router;

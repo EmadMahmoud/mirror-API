@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const UserConfirmation = require('../models/userspendingconfirmation');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { SENDMAILPASS, SENDMAILUSER, JWTSECRETKEY } = require('../util/config');
 const { validationResult } = require('express-validator');
@@ -143,6 +144,86 @@ exports.login = async (req, res, next) => {
         res.status(200).json({
             token: token,
             userId: loggedUser._id.toString()
+        })
+
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+exports.sendResetPasswordLink = async (req, res, next) => {
+    const email = req.body.email;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation Failed');
+        error.statusCode = 422;
+        error.data = errors.array();
+        return next(error);
+    }
+    try {
+        crypto.randomBytes(32, async (err, buffer) => {
+            if (err) {
+                const error = new Error('Something went wrong');
+                error.statusCode = 500;
+                next(error);
+            }
+            const token = buffer.toString('hex');
+            const user = await User.findOne({ email: email });
+            if (!user) {
+                const error = new Error('User not found');
+                error.statusCode = 401;
+                throw error;
+            }
+            user.resetToken = token;
+            user.resetTokenEpiration = Date.now() + (36 * 36 * 1000);
+            await user.save();
+            transporter.sendMail({
+                to: email,
+                from: SENDMAILUSER,
+                subject: 'Reset Password',
+                html: `<h1>You requested a password reset</h1> <p>Click this <a href="http://localhost:3000/reset?t=${token}&e=${email}">link</a> to set a new password.</p>
+                <u>note: this link will not be valid after 1 hour.</u>`
+            })
+            res.status(200).json({
+                message: 'Reset Password Link Sent Successfully, Check Your Email.'
+            })
+        });
+    } catch (err) {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+exports.setNewPassword = async (req, res, next) => {
+    const password = req.body.password;
+    const token = req.body.token;
+    const email = req.body.email;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation Failed');
+        error.statusCode = 422;
+        error.data = errors.array();
+        return next(error);
+    }
+    try {
+        const user = await User.findOne({ email: email, resetToken: token, resetTokenEpiration: { $gt: Date.now() } })
+        if (!user) {
+            const error = new Error('User not found');
+            error.statusCode = 401;
+            next(error);
+        }
+        const hashedPassword = await bcrypt.hash(password, 12);
+        user.password = hashedPassword;
+        user.resetToken = undefined;
+        user.resetTokenEpiration = undefined;
+        await user.save();
+        res.status(200).json({
+            message: 'Password Changed Successfully, You now can Signin.'
         })
 
     } catch (err) {
