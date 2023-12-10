@@ -26,6 +26,12 @@ router.post('/signup',
     ],
     authController.signup);
 
+router.post('/confirmEmail',
+    [
+        body('confirmationCode', 'The code you entered is not correct!').isNumeric().isLength({ min: 7, max: 7 })
+    ],
+    authController.confirmEmail)
+
 router.post('/login',
     [
         body('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail').custom(async value => {
