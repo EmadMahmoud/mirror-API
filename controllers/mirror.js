@@ -65,7 +65,6 @@ exports.getThing = async (req, res, next) => {
 
     const thingId = req.params.thingid;
     const userId = req.userId;
-    console.log(thingId)
 
     try {
         const thing = await Thing.findById(thingId);

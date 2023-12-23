@@ -10,7 +10,7 @@ const pendingUsersSchema = require('./models/userspendingconfirmation');
 const cron = require('node-cron');
 
 /*
-this schedule will run every 5 hours, then delete any pending user with a sending confirmation code over than an hour.
+this schedule will run every 5 hours, then delete any pending user with a sending confirmation code over than half an hour.
 */
 cron.schedule('0 */5 * * *', async () => {
     try {
