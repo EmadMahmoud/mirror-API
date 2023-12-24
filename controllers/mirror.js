@@ -29,7 +29,8 @@ exports.addThing = async (req, res, next) => {
         const user = await User.findById(userId);
         user.profile.things.push({ thingId: result._id });
         await user.save();
-        res.status(201).json({
+        res.status(201)
+        res.json({
             message: 'Thing created',
             thing: result
         })
@@ -79,7 +80,8 @@ exports.getThing = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
-        res.status(200).json({
+        res.status(200)
+        res.json({
             message: 'Thing fetched',
             thing: thing
         })
@@ -206,26 +208,4 @@ exports.generatePdf = async (req, res, next) => {
             }
             next(err);
         })
-
-
-
-    // const userId = req.userId;
-    // const things = await Thing.find({ userId: userId });
-    // const pdfDoc = new PDFDocument();
-    // res.setHeader('Content-Type', 'application/pdf');
-    // res.setHeader('Content-Disposition', 'inline; filename="things.pdf"');
-    // pdfDoc.pipe(fs.createWriteStream('things.pdf'));
-    // pdfDoc.pipe(res);
-    // pdfDoc.fontSize(26).text('Things List', {
-    //     underline: true
-    // });
-    // pdfDoc.text('-----------------------');
-    // let totalPrice = 0;
-    // things.forEach(thing => {
-    //     totalPrice += thing.price;
-    //     pdfDoc.fontSize(14).text(thing.name + ' - ' + thing.price);
-    // });
-    // pdfDoc.text('-----------------------');
-    // pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
-    // pdfDoc.end();
 }

@@ -8,15 +8,17 @@ const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
 
-const transporter = nodemailer.createTransport({
+
+const createTransport = (() => nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: SENDMAILUSER,
         pass: SENDMAILPASS
     }
-})
+}))
 
 exports.signup = async (req, res, next) => {
+
 
     const email = req.body.email;
     const password = req.body.password;
@@ -38,7 +40,7 @@ exports.signup = async (req, res, next) => {
             confirmationCode: confirmationCode
         })
         await user.save();
-
+        const transporter = createTransport();
         transporter.sendMail({
             to: email,
             from: SENDMAILUSER,
@@ -46,7 +48,8 @@ exports.signup = async (req, res, next) => {
             html: `<h1>You successfully signed up!</h1> <p>Your Confirmation Code is ${confirmationCode}</p>
                     <u>note: this confirmation code will not be valid after 10 minute.</u>`
         })
-        res.status(201).json({
+        res.status(201)
+        res.json({
             message: 'Signup successful, check your email for verification.',
             email: email
         })

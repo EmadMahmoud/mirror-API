@@ -45,7 +45,7 @@ describe('is-Auth Middleware', () => {
         const next = mockNext;
 
         await authMiddleware(req, res, next);
-
+        // console.log(next.mock.calls[0][0]);
         expect.assertions(1)
         expect(next).toHaveBeenCalledWith(expect.objectContaining({
             message: 'Not authenticated',
