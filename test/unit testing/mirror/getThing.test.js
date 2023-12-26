@@ -1,13 +1,11 @@
-jest.mock('../../models/thing');
-jest.mock('express-validator');
+// Mocking the thing model
+jest.mock('../../../models/thing');
 
+const Thing = require('../../../models/thing');
 
-const Thing = require('../../models/thing');
-const { validationResult } = require('express-validator');
+const { getThing } = require('../../../controllers/mirror');
 
-const { getThing } = require('../../controllers/mirror');
-
-
+// Creating mock request, response, and next functions
 const mockRequest = jest.fn(() => {
     return {
         userId: 'userId',
@@ -33,15 +31,17 @@ describe('Mirror ontroller - getThing', () => {
         jest.clearAllMocks();
     });
 
-    test('should throw an error if thing not found', async () => {
+    test.only('should throw an error if thing not found', async () => {
         const req = mockRequest();
         const res = mockResponse();
         const next = mockNext;
 
+        // Mocking Thing.findById to return null
         Thing.findById.mockReturnValue(null);
 
         await getThing(req, res, next);
 
+        // Expectations
         expect(Thing.findById).toHaveBeenCalled();
         expect(Thing.findById).toHaveBeenCalledWith(req.params.thingid);
         expect(Thing.findById()).toEqual(null);

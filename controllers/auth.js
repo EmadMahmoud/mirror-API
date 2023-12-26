@@ -3,7 +3,7 @@ const UserConfirmation = require('../models/userspendingconfirmation');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const { SENDMAILPASS, SENDMAILUSER, JWTSECRETKEY } = require('../util/config');
+// const { SENDMAILPASS, SENDMAILUSER, JWTSECRETKEY } = process.env;
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
@@ -12,8 +12,8 @@ const jwt = require('jsonwebtoken');
 const createTransport = (() => nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: SENDMAILUSER,
-        pass: SENDMAILPASS
+        user: process.env.SENDMAILUSER,
+        pass: process.env.SENDMAILPASS
     }
 }))
 
@@ -43,7 +43,7 @@ exports.signup = async (req, res, next) => {
         const transporter = createTransport();
         transporter.sendMail({
             to: email,
-            from: SENDMAILUSER,
+            from: process.env.SENDMAILUSER,
             subject: 'Confirmation Code',
             html: `<h1>You successfully signed up!</h1> <p>Your Confirmation Code is ${confirmationCode}</p>
                     <u>note: this confirmation code will not be valid after 10 minute.</u>`
@@ -94,7 +94,7 @@ exports.confirmEmail = async (req, res, next) => {
         })
         transporter.sendMail({
             to: savedUser.email,
-            from: SENDMAILUSER,
+            from: process.env.SENDMAILUSER,
             subject: 'Welcome To The Family!',
             html: '<h1>Email Confirmed Successfully, Start Building Your Profile Now.</h1>'
         })
@@ -139,7 +139,7 @@ exports.login = async (req, res, next) => {
                 email: loggedUser.email,
                 userId: loggedUser._id.toString()
             },
-            JWTSECRETKEY,
+            process.env.JWTSECRETKEY,
             {
                 expiresIn: '3h'
             }
@@ -185,7 +185,7 @@ exports.sendResetPasswordLink = async (req, res, next) => {
             await user.save();
             transporter.sendMail({
                 to: email,
-                from: SENDMAILUSER,
+                from: process.env.SENDMAILUSER,
                 subject: 'Reset Password',
                 html: `<h1>You requested a password reset</h1> <p>Click this <a href="http://localhost:3000/reset?t=${token}&e=${email}">link</a> to set a new password.</p>
                 <u>note: this link will not be valid after 1 hour.</u>`

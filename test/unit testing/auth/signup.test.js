@@ -1,4 +1,4 @@
-jest.mock('../../models/userspendingconfirmation');
+jest.mock('../../../models/userspendingconfirmation');
 jest.mock('bcryptjs');
 jest.mock('express-validator');
 jest.mock('nodemailer');
@@ -9,9 +9,9 @@ const nodemailer = require('nodemailer')
 
 
 
-const UserConfirmation = require('../../models/userspendingconfirmation');
+const UserConfirmation = require('../../../models/userspendingconfirmation');
 
-const authController = require('../../controllers/auth');
+const authController = require('../../../controllers/auth');
 
 
 const mockRequest = jest.fn(() => {

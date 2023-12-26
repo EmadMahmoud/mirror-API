@@ -1,13 +1,13 @@
-jest.mock('../../models/thing');
+jest.mock('../../../models/thing');
 jest.mock('express-validator');
-jest.mock('../../models/user');
+jest.mock('../../../models/user');
 
 
-const Thing = require('../../models/thing');
+const Thing = require('../../../models/thing');
 const { validationResult } = require('express-validator');
-const User = require('../../models/user');
+const User = require('../../../models/user');
 
-const { addThing } = require('../../controllers/mirror');
+const { addThing } = require('../../../controllers/mirror');
 
 
 const mockRequest = jest.fn(() => {

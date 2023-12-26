@@ -1,13 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const envars = require('./util/config');
+const loadEnv = require('./config')
+require('dotenv').config();
 const app = express();
 const authRoutes = require('./routes/auth');
 const mirrorRoutes = require('./routes/mirror');
 const path = require('path');
 const pendingUsersSchema = require('./models/userspendingconfirmation');
 const cron = require('node-cron');
+
 
 /*
 this schedule will run every 5 hours, then delete any pending user with a sending confirmation code over than half an hour.
@@ -49,10 +51,11 @@ app.use((error, req, res, next) => {
     res.status(status).json({ message: message, data: data });
 });
 
-mongoose.connect(envars.MONGODB_URI)
+loadEnv(process.env.NODE_ENV || 'development');
+mongoose.connect(process.env.DATABASE_URL)
     .then(result => {
-        app.listen(3000);
-        console.log('Db connected');
+        app.listen(process.env.PORT || 3000);
+        console.log(`app running on port ${process.env.PORT}`);
     })
     .catch(err => {
         console.log(err);
