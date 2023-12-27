@@ -4,3 +4,4 @@ util
 data
 play.js
 jsconfig.json
+*.env

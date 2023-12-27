@@ -3,7 +3,6 @@ const UserConfirmation = require('../models/userspendingconfirmation');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-// const { SENDMAILPASS, SENDMAILUSER, JWTSECRETKEY } = process.env;
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 
@@ -32,7 +31,10 @@ exports.signup = async (req, res, next) => {
     }
 
     try {
-        const confirmationCode = Math.floor(Math.random() * 9000000) + 10000000;
+        function generate7digit() {
+            return Math.floor(Math.random() * 9000000) + 1000000;
+        }
+        const confirmationCode = generate7digit();
         const hashedPassword = await bcrypt.hash(password, 12);
         const user = new UserConfirmation({
             email: email,
@@ -66,18 +68,26 @@ exports.confirmEmail = async (req, res, next) => {
     const email = req.body.email;
     const confirmationCode = req.body.confirmationCode;
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation Failed');
+        error.statusCode = 422;
+        error.data = errors.array();
+        return next(error);
+    }
+
     try {
         const now = new Date();
         const pendingUser = await UserConfirmation.findOne({ email: email, createdAt: { $gte: now.setMinutes(now.getMinutes() - 10) } });
         if (!pendingUser) {
             const error = new Error('User not found');
             error.statusCode = 401;
-            next(error);
+            throw error;
         }
         if (pendingUser.confirmationCode !== +confirmationCode) {
             const error = new Error('Wrong Confirmation Code');
             error.statusCode = 401;
-            next(error);
+            throw error;
         }
         const user = new User({
             email: pendingUser.email,
@@ -92,6 +102,7 @@ exports.confirmEmail = async (req, res, next) => {
             message: 'Email Confirmed, You now can Signin.',
             userId: savedUser._id
         })
+        const transporter = createTransport();
         transporter.sendMail({
             to: savedUser.email,
             from: process.env.SENDMAILUSER,
@@ -112,8 +123,8 @@ exports.login = async (req, res, next) => {
 
     const email = req.body.email;
     const password = req.body.password;
-    const errors = validationResult(req);
 
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
         const error = new Error('Validation Failed');
         error.statusCode = 422;
@@ -183,6 +194,7 @@ exports.sendResetPasswordLink = async (req, res, next) => {
             user.resetToken = token;
             user.resetTokenEpiration = Date.now() + (36 * 36 * 1000);
             await user.save();
+            const transporter = createTransport();
             transporter.sendMail({
                 to: email,
                 from: process.env.SENDMAILUSER,

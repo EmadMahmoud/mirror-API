@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { JWTSECRETKEY } = require('../util/config')
 
 module.exports = async (req, res, next) => {
     try {
@@ -10,7 +9,7 @@ module.exports = async (req, res, next) => {
             throw error;
         }
         const token = authHeader.split(' ')[1];
-        const decodedToken = jwt.verify(token, JWTSECRETKEY);
+        const decodedToken = jwt.verify(token, process.env.JWTSECRETKEY);
         if (!decodedToken) {
             const error = new Error('Malformed token');
             error.statusCode = 401;

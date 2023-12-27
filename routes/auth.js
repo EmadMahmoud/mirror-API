@@ -28,28 +28,15 @@ router.post('/signup',
 
 router.post('/confirmEmail',
     [
+        body('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail'),
         body('confirmationCode', 'The code you entered is not correct!').isNumeric().isLength({ min: 7, max: 7 })
     ],
     authController.confirmEmail)
 
 router.post('/login',
     [
-        body('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail').custom(async value => {
-            const user = await User.findOne({ email: value });
-            if (!user) {
-                throw new Error('No user with that email');
-            }
-        }),
-        body('password', 'Incorrect Password').isAlphanumeric().custom(async (value, { req }) => {
-            const user = await User.findOne({ email: req.body.email });
-            if (user) {
-                const doMatch = await bcrypt.compare(value, user.password);
-                if (!doMatch) {
-                    throw new Error('Incorrect Password');
-                }
-            }
-            return true;
-        })
+        body('email').normalizeEmail().isEmail().withMessage('Not a valid e-mail'),
+        body('password', 'Incorrect Password').isAlphanumeric()
     ],
     authController.login)
 
